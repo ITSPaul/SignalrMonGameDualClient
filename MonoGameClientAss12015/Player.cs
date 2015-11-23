@@ -26,7 +26,7 @@ namespace MonoGameClientAss12015
         Vector2 size;
         
 
-        public List<Sprite> _projectiles;
+        public Projectile PlayerProjectile;
 
         public Vector2 WorldBound
         {
@@ -41,6 +41,7 @@ namespace MonoGameClientAss12015
             }
         }
 
+
         public Player(Texture2D tx, Vector2 playerPos, float Speed, SpriteFont f, int FrameCount, float layerDepth, Vector2 worldBounds) :base(tx,playerPos,FrameCount,layerDepth )
         {
             font = f;
@@ -52,6 +53,7 @@ namespace MonoGameClientAss12015
             worldBound = worldBounds;
         }
 
+       
 
         public override void Update(GameTime gameTime)
         {
@@ -133,7 +135,8 @@ namespace MonoGameClientAss12015
 
         public void DrawWithMessage(SpriteBatch spriteBatch, SpriteFont font)
         {
-            spriteBatch.DrawString(font, playerId, position + new Vector2(10, -20), Color.White);
+            Vector2 textlength = font.MeasureString(playerId);
+            spriteBatch.DrawString(font, playerId, position + new Vector2(-spriteHeight, -textlength.X/2), Color.White);
             base.Draw(spriteBatch);
         }
 

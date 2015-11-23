@@ -196,6 +196,34 @@ namespace MonoGameClientAss12015
                 }
             });
 
+            proxy.On<int, int, string>("opponentBarrierHit",
+                        (x, y, owner) =>
+                        {
+                                        // as long as no two barriers have the same position
+                                        Barrier hitb = _barriers
+                                        .Where(b => b.position.X == x && b.position.Y == y && b.owner != owner)
+                                        .FirstOrDefault();
+                            if (hitb != null)
+                            {
+                                hitb.NumberOfHits++;
+                            }
+                        });
+
+            proxy.On<int, int, string>("opponentCollected",
+                        (x, y, owner) =>
+                        {
+                            // as long as no two barriers have the same position
+                            var collected = _collectables
+                            .Where(c => c.position.X == x && c.position.Y == y && c.owner != owner);
+                            if (collected!= null)
+                            {
+                                foreach (Collectable c in collected)
+                                {
+                                    _collectables.Remove(c);
+                                }
+                            }
+                        });
+
             // TODO: use this.Content to load your game content here
         }
         // Create a barrier locally and inform listening clients that it is in the game
@@ -272,11 +300,15 @@ namespace MonoGameClientAss12015
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            foreach (Barrier b in _barriers)
-                b.Update(gameTime);
-            foreach (Collectable c in _collectables)
-                c.Update(gameTime);
-
+            if (playing)
+            {
+                foreach (Barrier b in _barriers)
+                    b.Update(gameTime);
+                foreach (Collectable c in _collectables)
+                    c.Update(gameTime);
+                //checkBarrierHits();
+                checkCollectedItems();
+            }
             if (myConnection.State == ConnectionState.Connected)
             {
                 oldPos = player.position;
@@ -296,6 +328,53 @@ namespace MonoGameClientAss12015
             base.Update(gameTime);
         }
 
+        private void checkCollectedItems()
+        {
+            // see if a player is collecting anything
+            var collected = _collectables
+                .Where(c => c.Visible && c.collisionDetect(player) && c.owner == player.clientID);
+            // if there has been anything collected then remove it
+            if (collected != null)
+            {
+                foreach (var  c in collected)
+                {
+                    player.score += c.value;
+                    _collectables.Remove(c);
+                    // inform the others that it is collected
+                    proxy.Invoke("collected",
+                        new object[] { c.position.X, c.position.Y });
+                }
+            }
+
+        }
+
+
+
+        private void checkBarrierHits()
+        {
+            // get any hits on opponents barriers
+            var hits = _barriers
+                .Where(barrier => barrier.owner != player.clientID
+                && player.PlayerProjectile.collisionDetect(barrier));
+            // Apply the hits 
+            if (hits != null)
+            {
+                player.PlayerProjectile.ProjectileState = Projectile.PROJECTILE_STATE.EXPOLODING;
+                foreach (Barrier barrier in hits)
+                {
+                    barrier.NumberOfHits++;
+                    proxy.Invoke("barrierHit",
+                        new object[] { barrier.position.X, barrier.position.Y });
+                }
+                // destroy any barriers that need destroying irrespective of player
+                var destroyed = _barriers.Where(b => b.NumberOfHits > 2);
+                if(destroyed != null)
+                {
+                    foreach (var b in destroyed)
+                        _barriers.Remove(b);
+                }
+            }
+        }
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>

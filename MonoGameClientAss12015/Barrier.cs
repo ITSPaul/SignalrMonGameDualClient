@@ -8,7 +8,7 @@ using System.Text;
 
 namespace MonoGameClientAss12015
 {
-    class Barrier:Sprite
+    public class Barrier:Sprite
     {
         public int value;
         public int NumberOfHits;
@@ -21,7 +21,9 @@ namespace MonoGameClientAss12015
 
         public void DrawWithMessage(SpriteBatch spriteBatch, SpriteFont font)
         {
-            spriteBatch.DrawString(font, owner, position + new Vector2(10, -20), Color.White);
+            string barrierMessage = "Barrier Hits " + NumberOfHits.ToString();
+            Vector2 msgLen = font.MeasureString(barrierMessage);
+            spriteBatch.DrawString(font, barrierMessage, position + new Vector2(-spriteHeight, msgLen.X/2), Color.White);
             base.Draw(spriteBatch);
         }
     }

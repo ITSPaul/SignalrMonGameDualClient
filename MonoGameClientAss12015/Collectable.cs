@@ -20,7 +20,13 @@ namespace MonoGameClientAss12015
 
         }
 
-
+        public void DrawWithMessage(SpriteBatch spriteBatch, SpriteFont font)
+        {
+            string collectableMessage = "Value " + value.ToString();
+            Vector2 msgLen = font.MeasureString(collectableMessage);
+            spriteBatch.DrawString(font, collectableMessage, position + new Vector2(-spriteHeight, msgLen.X / 2), Color.White);
+            base.Draw(spriteBatch);
+        }
     }
 
     public class SuperCollectable : Collectable
@@ -29,5 +35,7 @@ namespace MonoGameClientAss12015
         {
             value = 1000;
         }
+
+
     }
 }

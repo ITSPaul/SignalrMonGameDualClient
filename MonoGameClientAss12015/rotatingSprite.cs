@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 
 namespace AnimatedSprite
 {
-    class RotatingSprite : Sprite
+    public class RotatingSprite : Sprite
     {
         public RotatingSprite( Texture2D tx, Vector2 StartPosition, int NoOfFrames, float layerDepth)
             : base(tx, StartPosition, NoOfFrames,layerDepth)
