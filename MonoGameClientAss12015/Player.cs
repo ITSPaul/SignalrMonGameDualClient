@@ -11,6 +11,7 @@ using System.Text;
 
 namespace MonoGameClientAss12015
 {
+
     public class Player : Sprite
     {
         public SpriteFont font;
@@ -55,7 +56,7 @@ namespace MonoGameClientAss12015
 
        
 
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, string currentClient)
         {
 #if ANDROID
             
@@ -65,15 +66,19 @@ namespace MonoGameClientAss12015
             TouchCollection t = TouchPanel.GetState();
 
 #endif
-            if (InputEngineNS.InputEngine.IsKeyHeld(Keys.A))
-                position += new Vector2(-1, 0) * speed;
-            if (InputEngineNS.InputEngine.IsKeyHeld(Keys.W))
-                position += new Vector2(0, -1) * speed;
-            if (InputEngineNS.InputEngine.IsKeyHeld(Keys.S))
-                position += new Vector2(0, 1) * speed;
-            if (InputEngineNS.InputEngine.IsKeyHeld(Keys.D))
-                position += new Vector2(1, 0) * speed;
-            position = Vector2.Clamp(position, size/2, WorldBound - size/2);
+            // Player not opponent
+            if (clientID == currentClient)
+            {
+                if (InputEngineNS.InputEngine.IsKeyHeld(Keys.A))
+                    position += new Vector2(-1, 0) * speed;
+                if (InputEngineNS.InputEngine.IsKeyHeld(Keys.W))
+                    position += new Vector2(0, -1) * speed;
+                if (InputEngineNS.InputEngine.IsKeyHeld(Keys.S))
+                    position += new Vector2(0, 1) * speed;
+                if (InputEngineNS.InputEngine.IsKeyHeld(Keys.D))
+                    position += new Vector2(1, 0) * speed;
+                position = Vector2.Clamp(position, size / 2, WorldBound - size / 2);
+            }
             base.Update(gameTime);
         }
 #if ANDROID
@@ -100,47 +105,11 @@ namespace MonoGameClientAss12015
 #endif
         public void DrawWithMessage(SpriteBatch spriteBatch, SpriteFont font)
         {
-            spriteBatch.DrawString(font, playerId, position + new Vector2(10, -20), Color.White);
+            string message = playerId + " Score " + score.ToString() + " Health " + health.ToString();
+            Vector2 textlength = font.MeasureString(message);
+            spriteBatch.DrawString(font, message, position + new Vector2(-textlength.X / 2, -spriteHeight), Color.White);
             base.Draw(spriteBatch);
         }
-
-    }
-
-    public class Opponent : Sprite
-    {
-        public SpriteFont font;
-        public string info;
-        public int score;
-        public int health;
-        public int strength;
-        public string textureName;
-        public string playerId = string.Empty;
-        public float speed;
-        public string clientID;
-
-        public Opponent(Texture2D tx, Vector2 playerPos, float Speed, SpriteFont f, int FrameCount, float layerDepth) 
-            :base(tx,playerPos,FrameCount,layerDepth)
-        {
-            font = f;
-            font = f;
-            health = 100;
-            speed = Speed;
-            textureName = tx.Name;
-        }
-
-        public override void Update(GameTime gametime)
-        {
-            base.Update(gametime);
-        }
-
-        public void DrawWithMessage(SpriteBatch spriteBatch, SpriteFont font)
-        {
-            Vector2 textlength = font.MeasureString(playerId);
-            spriteBatch.DrawString(font, playerId, position + new Vector2(-spriteHeight, -textlength.X/2), Color.White);
-            base.Draw(spriteBatch);
-        }
-
-        
 
     }
 }
